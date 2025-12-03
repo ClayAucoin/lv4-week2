@@ -9,11 +9,11 @@ import supabase from "../utils/db.js"
 const router = express.Router()
 router.use(express.json());
 
-router.get("/:id", validateId, async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   console.log("GET /items/id")
   console.log("id:", req.params, "typeof:", typeof req.params)
 
-  const id = Number(req.params.id)
+  const id = req.params.id
 
   // const movie = data.find((entry) => entry.id === id)
 
@@ -25,7 +25,7 @@ router.get("/:id", validateId, async (req, res, next) => {
     .maybeSingle();
 
   if (!data) {
-    return next(sendError(404, "Movie not found", "NOT_FOUND"))
+    return next(sendError(404, "Item not found", "NOT_FOUND"))
   }
 
   res.status(200).json({

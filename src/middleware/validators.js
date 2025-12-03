@@ -7,16 +7,18 @@ export function validateId(req, res, next) {
   const rawId = req.params.id
   const numId = Number(rawId)
 
+  if (id === undefined) { return next(sendError(400, `"id" missing`, "INVALID_ID", { value: rawId })) }
+
   // not integer
-  if (!Number.isInteger(numId)) { return next(sendError(400, `'id' must be an integer`, "INVALID_ID", { value: rawId })) }
+  // if (!Number.isInteger(numId)) { return next(sendError(400, `'id' must be an integer`, "INVALID_ID", { value: rawId })) }
 
   // no negative or zero ids
-  if (numId <= 0) { return next(sendError(400, `"id" must be greater than 0`, "INVALID_ID", { value: numId })) }
+  // if (numId <= 0) { return next(sendError(400, `"id" must be greater than 0`, "INVALID_ID", { value: numId })) }
 
   next();
 }
 
-export function validateMovieBody(req, res, next) {
+export function validateItemBody(req, res, next) {
 
   if (!req.body || Object.keys(req.body).length === 0) {
     return next(sendError(400, "Request body is required", "MISSING_BODY"))
