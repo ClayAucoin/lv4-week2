@@ -4,27 +4,33 @@ import express from "express"
 import { sendError } from "../utils/sendError.js"
 import { validateId } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
-
 // import data from "../data.js" // test data
 
 const router = express.Router()
 router.use(express.json());
 
-router.get("/:id", validateId, (req, res, next) => {
-  console.log("GET /find/id")
-
+router.get("/:id", validateId, async (req, res, next) => {
+  console.log("GET /items/id")
   console.log("id:", req.params, "typeof:", typeof req.params)
 
   const id = Number(req.params.id)
-  const movie = data.find((entry) => entry.id === id)
 
-  if (!movie) {
+  // const movie = data.find((entry) => entry.id === id)
+
+  // comment to use with test data
+  const { data, error } = await supabase
+    .from('movies_simple')
+    .select('*')
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!data) {
     return next(sendError(404, "Movie not found", "NOT_FOUND"))
   }
 
   res.status(200).json({
     ok: true,
-    data: movie
+    data: data
   })
 })
 
