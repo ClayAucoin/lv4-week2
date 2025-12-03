@@ -1,15 +1,17 @@
-// src/routes/find-movie.js
+// src/routes/find.js
 
 import express from "express"
-import data from "../data.js"
 import { sendError } from "../utils/sendError.js"
 import { validateId } from "../middleware/validators.js"
+import supabase from "../utils/db.js"
+
+// import data from "../data.js" // test data
 
 const router = express.Router()
 router.use(express.json());
 
 router.get("/:id", validateId, (req, res, next) => {
-  console.log("GET /find-movie/id")
+  console.log("GET /find/id")
 
   console.log("id:", req.params, "typeof:", typeof req.params)
 
