@@ -1,40 +1,53 @@
 // src/routes/del.js
 
 import express from "express"
-import movies from "../data.js"
 import { validateId } from "../middleware/validators.js";
 import { sendError } from "../utils/sendError.js";
+import supabase from "../utils/db.js"
+// import data from "../data.js" // test data
 
 const router = express.Router()
 router.use(express.json());
 
-router.delete("/:id", validateId, (req, res, next) => {
+router.delete("/:id", validateId, async (req, res, next) => {
   console.log("DELETE /items")
-  const id = Number(req.params.id)
 
-  const removed = deleteItemById(id)
+  try {
+    const id = req.params.id
+    const removed = await deleteItemById(id)
 
-  if (!removed) {
-    return next(sendError(404, "Movie not found", "NOT_FOUND"))
+    if (!removed) {
+      return next(sendError(404, "Movie not found", "NOT_FOUND"))
+    }
+
+    res.status(200).json({
+      ok: true,
+      message: "Movie deleted successfully",
+      data: removed
+    })
+  } catch (err) {
+    next(err)
   }
-
-  res.status(200).json({
-    ok: true,
-    message: "Movie deleted successfully",
-    data: removed
-  })
 })
 
 // helper: delete movie
-export function deleteItemById(id) {
-  const index = movies.findIndex((movie) => movie.id === id)
+export async function deleteItemById(id) {
+  const { data: deleted, error } = await supabase
+    .from("movies_simple")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle()
 
-  if (index === -1) {
+  if (error) {
+    throw sendError(500, "Error deleting item", "DELETE_ERROR", { underlying: error.message })
+  }
+
+  if (!deleted) {
     return null
   }
 
-  const [removed] = movies.splice(index, 1)
-  return removed
+  return deleted
 }
 
 export default router

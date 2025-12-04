@@ -44,6 +44,8 @@ export function globalErrorHandler(err, req, res, next) {
     payload.error.details = err.details
   }
 
+  console.log("err.stack:", err.stack)
+
   res.status(status).json(payload)
 }
 

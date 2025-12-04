@@ -1,35 +1,35 @@
 // src/routes/add.js
 
 import express from "express"
-import { validateItemBody } from "../middleware/validators.js"
+import { validateRequiredFields, validateItemBody } from "../middleware/validators.js"
 import { sendError } from "../utils/sendError.js"
-import { randomUUID } from 'node:crypto'
 import supabase from "../utils/db.js"
-// import data from "../data.js" // test data
 
 const router = express.Router()
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }))
 
-router.post("/", validateItemBody, async (req, res, next) => {
+router.post("/", validateRequiredFields, validateItemBody, async (req, res, next) => {
   console.log("POST /items", req.body)
-  const newMovie = req.body
-  const newItem = { ...req.body, id: randomUUID() }
+  const newItem = req.body
 
-  console.log("newItem", newItem)
+  try {
+    const { data, error } = await supabase
+      .from('movies_simple')
+      .insert(newItem)
+      .select()
+      .single()
 
-  // to use with test data
-  // data.push(newMovie)
+    if (error) return next(sendError(500, error.message, "INSERT_ERROR", { underlying: error }))
 
-  const { data, error } = await supabase
-    .from('movies_simple')
-    .insert(newItem)
-
-  res.status(200).json({
-    ok: true,
-    message: "Item added successfuly",
-    data: newMovie
-  })
+    res.status(201).json({
+      ok: true,
+      message: "Item added successfully",
+      data: data
+    })
+  } catch (err) {
+    next(sendError(500, "Failed to add item", "WRITE_ERROR"))
+  }
 })
 
 export default router
