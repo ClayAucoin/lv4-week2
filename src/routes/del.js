@@ -1,36 +1,42 @@
 // src/routes/del.js
 
 import express from "express"
-import { validateId } from "../middleware/validators.js";
 import { sendError } from "../utils/sendError.js";
+import { validateId } from "../middleware/validators.js";
 import supabase from "../utils/db.js"
-// import data from "../data.js" // test data
 
 const router = express.Router()
-router.use(express.json());
 
-router.delete("/:id", validateId, async (req, res, next) => {
-  console.log("DELETE /items")
+router.delete("/:id",
+  validateId,
+  async (req, res, next) => {
+    console.log("DELETE /items/:id", id)
 
-  try {
-    const id = req.params.id
-    const removed = await deleteItemById(id)
+    try {
+      const id = req.params.id
+      const removed = await deleteItemById(id)
 
-    if (!removed) {
-      return next(sendError(404, "Movie not found", "NOT_FOUND"))
+      if (!removed) {
+        return next(sendError(
+          404,
+          "Item not found",
+          "NOT_FOUND",
+          { path: req.path, method: req.method }
+        ))
+      }
+
+      res.status(200).json({
+        ok: true,
+        records: removed.length,
+        message: "Item deleted successfully",
+        data: removed
+      })
+    } catch (err) {
+      next(err)
     }
+  })
 
-    res.status(200).json({
-      ok: true,
-      message: "Movie deleted successfully",
-      data: removed
-    })
-  } catch (err) {
-    next(err)
-  }
-})
-
-// helper: delete movie
+// helper: delete item
 export async function deleteItemById(id) {
   const { data: deleted, error } = await supabase
     .from("movies_simple")
@@ -40,7 +46,12 @@ export async function deleteItemById(id) {
     .maybeSingle()
 
   if (error) {
-    throw sendError(500, "Error deleting item", "DELETE_ERROR", { underlying: error.message })
+    throw sendError(
+      500,
+      "Error deleting item",
+      "DELETE_ERROR",
+      { underlying: error.message }
+    )
   }
 
   if (!deleted) {

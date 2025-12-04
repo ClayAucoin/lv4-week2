@@ -1,4 +1,5 @@
-// src/index.js
+// src/app.js
+
 import express from "express"
 import cors from "cors"
 
@@ -16,7 +17,6 @@ const app = express();
 
 app.use(cors())
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
 
 // use routes
 app.use("/", rootRouter)
@@ -26,7 +26,16 @@ app.use("/items", addRouter)
 app.use("/items", delRouter)
 
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && "body" in err) {
+    return next(sendError(400, "Invalid JSON body", "INVALID_JSON"))
+  }
+  next(err)
+})
+
+
 export function globalErrorHandler(err, req, res, next) {
+
   const status = err.status || 500
   const code = err.code || "INTERNAL_ERROR"
   const message = err.message || "Server error"
@@ -44,13 +53,20 @@ export function globalErrorHandler(err, req, res, next) {
     payload.error.details = err.details
   }
 
-  console.log("err.stack:", err.stack)
+  if (process.env.NODE_env !== "test") {
+    console.log("err.stack:", err.stack || err)
+  }
 
   res.status(status).json(payload)
 }
 
 export function error404(req, res, next) {
-  next(sendError(404, "Route not found", "NOT_FOUND"))
+  next(sendError(
+    404,
+    "Route not found",
+    "NOT_FOUND",
+    { path: req.path, method: req.method }
+  ))
 }
 
 // routes error 404

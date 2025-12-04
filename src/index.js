@@ -1,4 +1,4 @@
-// src/utils/listener.js
+// src/index.js
 
 import app from "./app.js"
 import { config } from "./config.js"

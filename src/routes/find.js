@@ -4,34 +4,47 @@ import express from "express"
 import { sendError } from "../utils/sendError.js"
 import { validateId } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
-// import data from "../data.js" // test data
 
 const router = express.Router()
-router.use(express.json());
 
-router.get("/:id", validateId, async (req, res, next) => {
-  console.log("GET /items/id")
-  console.log("id:", req.params, "typeof:", typeof req.params)
+router.get("/:id",
+  validateId,
+  async (req, res, next) => {
 
-  const id = req.params.id
+    console.log("GET /items/:id", id)
+    const id = req.params.id
 
-  // const movie = data.find((entry) => entry.id === id)
+    const { data, error } = await supabase
+      .from('movies_simple')
+      .select()
+      .eq("id", id)
+      .maybeSingle()
 
-  // comment to use with test data
-  const { data, error } = await supabase
-    .from('movies_simple')
-    .select('*')
-    .eq("id", id)
-    .maybeSingle();
+    if (error) {
+      return next(sendError(
+        500,
+        error.message,
+        "READ_ERROR"
+      ))
+    }
 
-  if (error) return next(sendError(500, error.message, "INTERNAL_ERROR"))
+    if (!data) {
+      return next(sendError(
+        404,
+        "Item not found",
+        "NOT_FOUND",
+        { path: req.path, method: req.method }
+      ))
+    }
 
-  if (!data) return next(sendError(404, "Item not found", "NOT_FOUND"))
+    const records = data.length
+    console.log("records:", records)
 
-  res.status(200).json({
-    ok: true,
-    data: data
+    res.status(200).json({
+      ok: true,
+      records: records,
+      data: data
+    })
   })
-})
 
 export default router

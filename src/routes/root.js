@@ -1,12 +1,11 @@
 // src/routes/root.js
 
 import express from "express"
-import { sendError } from "../utils/sendError.js"
 
 const router = express.Router()
 
 router.get("/", (req, res, next) => {
-  console.log("GET /root")
+  console.log("GET /")
   let response = "<h1>Express Running</h1>"
   console.log(response)
 

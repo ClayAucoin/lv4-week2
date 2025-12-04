@@ -1,35 +1,53 @@
 // src/routes/add.js
 
 import express from "express"
-import { validateRequiredFields, validateItemBody } from "../middleware/validators.js"
 import { sendError } from "../utils/sendError.js"
+import { requireBody, validateAllowedFields, validateItemBody } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
 
 const router = express.Router()
-router.use(express.json());
-router.use(express.urlencoded({ extended: true }))
 
-router.post("/", validateRequiredFields, validateItemBody, async (req, res, next) => {
-  console.log("POST /items", req.body)
-  const newItem = req.body
+router.post("/",
+  requireBody,
+  validateAllowedFields,
+  validateItemBody,
+  async (req, res, next) => {
 
-  try {
-    const { data, error } = await supabase
-      .from('movies_simple')
-      .insert(newItem)
-      .select()
-      .single()
+    console.log("POST /items/", req.body)
+    const newItem = req.body
 
-    if (error) return next(sendError(500, error.message, "INSERT_ERROR", { underlying: error }))
+    try {
+      const { data, error } = await supabase
+        .from('movies_simple')
+        .insert(newItem)
+        .select()
+        .single()
 
-    res.status(201).json({
-      ok: true,
-      message: "Item added successfully",
-      data: data
-    })
-  } catch (err) {
-    next(sendError(500, "Failed to add item", "WRITE_ERROR"))
-  }
-})
+      if (error) {
+        return next(sendError(
+          500,
+          error.message,
+          "INSERT_ERROR",
+          { underlying: error.message }
+        ))
+      }
+
+      res.status(201).json({
+        ok: true,
+        records: data.length,
+        message: "Item added successfully",
+        data: data
+      })
+
+    } catch (err) {
+
+      next(sendError(
+        500,
+        "Failed to add item",
+        "WRITE_ERROR",
+        { underlying: error.message }
+      ))
+    }
+  })
 
 export default router
