@@ -1,9 +1,12 @@
 // src/routes/update.js
 
 import express from "express"
+import { config } from "../config.js"
 import { sendError } from "../utils/sendError.js"
 import { requireBody, validateAllowedFields, validateId, validateItemBody } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
+
+const tableName = config.moviesTable
 
 const router = express.Router()
 
@@ -20,7 +23,7 @@ router.put("/:id",
       const newItem = req.body
 
       const { data, error } = await supabase
-        .from('movies_simple')
+        .from(tableName)
         .update(newItem)
         .eq('id', id)
         .select()

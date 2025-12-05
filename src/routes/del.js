@@ -1,9 +1,12 @@
 // src/routes/del.js
 
 import express from "express"
+import { config } from "../config.js"
 import { sendError } from "../utils/sendError.js";
 import { validateId } from "../middleware/validators.js";
 import supabase from "../utils/db.js"
+
+const tableName = config.moviesTable
 
 const router = express.Router()
 
@@ -39,7 +42,7 @@ router.delete("/:id",
 // helper: delete item
 export async function deleteItemById(id) {
   const { data: deleted, error } = await supabase
-    .from("movies_simple")
+    .from(tableName)
     .delete()
     .eq("id", id)
     .select()

@@ -1,9 +1,12 @@
 // src/routes/find.js
 
 import express from "express"
+import { config } from "../config.js"
 import { sendError } from "../utils/sendError.js"
 import { validateId } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
+
+const tableName = config.moviesTable
 
 const router = express.Router()
 
@@ -14,7 +17,7 @@ router.get("/:id",
     const id = req.params.id
 
     const { data, error } = await supabase
-      .from('movies_simple')
+      .from(tableName)
       .select()
       .eq("id", id)
       .maybeSingle()

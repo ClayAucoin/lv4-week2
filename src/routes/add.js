@@ -1,9 +1,12 @@
 // src/routes/add.js
 
 import express from "express"
+import { config } from "../config.js"
 import { sendError } from "../utils/sendError.js"
 import { requireBody, validateAllowedFields, validateItemBody } from "../middleware/validators.js"
 import supabase from "../utils/db.js"
+
+const tableName = config.moviesTable
 
 const router = express.Router()
 
@@ -18,7 +21,7 @@ router.post("/",
       const newItem = req.body
 
       const { data, error } = await supabase
-        .from('movies_simple')
+        .from(tableName)
         .insert(newItem)
         .select()
         .maybeSingle()

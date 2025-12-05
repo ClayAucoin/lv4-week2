@@ -9,4 +9,5 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   supabaseUrl: process.env.SUPABASE_URL || "",
   supabaseKey: process.env.SUPABASE_ANON_KEY || "",
+  moviesTable: process.env.MOVIES_TABLE || "movies_simple",
 }
