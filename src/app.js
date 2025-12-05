@@ -8,6 +8,10 @@ import { sendError } from "./utils/sendError.js"
 import { config } from "./config.js"
 import morgan from "morgan"
 
+// middleware
+import fileLogger from "./middleware/fileLogger.js"
+import colorLogger from "./middleware/colorLogger.js"
+
 // import routes
 import rootRouter from "./routes/root.js"
 import itemsRouter from "./routes/items.js"
@@ -18,6 +22,10 @@ app.use(cors())
 app.use(express.json());
 
 app.use(morgan("dev"))
+
+// middleware: use log files
+app.use(fileLogger)
+app.use(colorLogger)
 
 // use routes
 app.use("/", rootRouter)
