@@ -10,7 +10,6 @@ const router = express.Router()
 router.delete("/:id",
   validateId,
   async (req, res, next) => {
-    console.log("DELETE /items/:id", id)
 
     try {
       const id = req.params.id
@@ -25,9 +24,10 @@ router.delete("/:id",
         ))
       }
 
+      console.log("DELETE /items/id", id)
       res.status(200).json({
         ok: true,
-        records: removed.length,
+        records: 1,
         message: "Item deleted successfully",
         data: removed
       })

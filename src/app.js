@@ -5,27 +5,25 @@ import cors from "cors"
 
 // utils
 import { sendError } from "./utils/sendError.js"
+import { config } from "./config.js"
+import morgan from "morgan"
 
 // import routes
 import rootRouter from "./routes/root.js"
-import readRouter from "./routes/read.js"
-import findRouter from "./routes/find.js"
-import addRouter from "./routes/add.js"
-import delRouter from "./routes/del.js"
+import itemsRouter from "./routes/items.js"
 
 const app = express();
 
 app.use(cors())
 app.use(express.json());
 
+app.use(morgan("dev"))
+
 // use routes
 app.use("/", rootRouter)
-app.use("/items", readRouter)
-app.use("/items", findRouter)
-app.use("/items", addRouter)
-app.use("/items", delRouter)
+app.use("/items", itemsRouter)
 
-
+// check for malformed JSON
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && "body" in err) {
     return next(sendError(400, "Invalid JSON body", "INVALID_JSON"))
@@ -33,12 +31,15 @@ app.use((err, req, res, next) => {
   next(err)
 })
 
-
 export function globalErrorHandler(err, req, res, next) {
 
+  if (config.nodeEnv !== "test") {
+    // console.log("stack:", err.stack || err)
+  }
+
   const status = err.status || 500
+  const message = err.message || "Internal Server error"
   const code = err.code || "INTERNAL_ERROR"
-  const message = err.message || "Server error"
 
   const payload = {
     ok: false,
@@ -51,10 +52,6 @@ export function globalErrorHandler(err, req, res, next) {
 
   if (err.details) {
     payload.error.details = err.details
-  }
-
-  if (process.env.NODE_env !== "test") {
-    console.log("err.stack:", err.stack || err)
   }
 
   res.status(status).json(payload)

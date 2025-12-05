@@ -7,7 +7,6 @@ import supabase from "../utils/db.js"
 const router = express.Router()
 
 router.get("/", async (req, res, next) => {
-  console.log("GET /items/")
 
   const { data, error } = await supabase
     .from('movies_simple')
@@ -22,9 +21,11 @@ router.get("/", async (req, res, next) => {
     ))
   }
 
+  const records = data.length
+  console.log(`GET /items/ ${records} records`)
   res.status(200).json({
     ok: true,
-    records: data.length,
+    records: records,
     data: data
   })
 })

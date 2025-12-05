@@ -16,7 +16,7 @@ export function requireBody(req, res, next) {
 }
 
 export function validateId(req, res, next) {
-  const id = req.params.id
+  const id = req.params.id || req.body.id
 
   const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -106,9 +106,35 @@ export function validateAllowedFields(req, res, next) {
       "Unexpected fields provided",
       "EXTRA_FIELDS",
       { extra: extraFields }
-    )
-    )
+    ))
   }
 
   next()
 }
+
+// const allowedFields = ["imdb_id", "title", "year", "runtime", "rating", "poster", "genres"]
+// function pickAllowedFields(body) {
+//   const clean = {}
+//   for (const key of allowedFields) {
+//     if (body[key] !== undefined) {
+//       clean[key] = body[key]
+//     }
+//   }
+//   return clean
+// }
+
+// export function requireField(fieldName) {
+//   return function (req, res, next) {
+//     if (req.body[fieldName] === undefined) {
+//       return next(
+//         sendError(
+//           422,
+//           `'${fieldName}' is required`,
+//           "MISSING_FIELD",
+//           { field: fieldName }
+//         )
+//       )
+//     }
+//     next()
+//   }
+// }

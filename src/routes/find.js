@@ -11,7 +11,6 @@ router.get("/:id",
   validateId,
   async (req, res, next) => {
 
-    console.log("GET /items/:id", id)
     const id = req.params.id
 
     const { data, error } = await supabase
@@ -23,8 +22,9 @@ router.get("/:id",
     if (error) {
       return next(sendError(
         500,
-        error.message,
-        "READ_ERROR"
+        "Failed to read data",
+        "READ_ERROR",
+        { underlying: error.message }
       ))
     }
 
@@ -37,12 +37,10 @@ router.get("/:id",
       ))
     }
 
-    const records = data.length
-    console.log("records:", records)
-
+    console.log("GET /items/id", id)
     res.status(200).json({
       ok: true,
-      records: records,
+      records: 1,
       data: data
     })
   })
